@@ -1,0 +1,8 @@
+<body>
+    <h1>데이터 조회</h1>
+    {{ range $person := .persons }}
+    <h2>{{ .ID }} {{ .Contents }}</h2>
+    {{ end }}
+
+    <a href="/">메인 메뉴로 돌아가기</a>
+</body>
