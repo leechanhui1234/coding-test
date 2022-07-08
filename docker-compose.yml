@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  mongodb:
+    image: mongo
+    restart: always
+    container_name: mongodb
+    ports:
+      -  "20000:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: leechanhui
+      MONGO_INITDB_ROOT_PASSWORD: qwer1234

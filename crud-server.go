@@ -16,7 +16,7 @@ type Person struct {
 	Contents string		`form:"contents"`
 }
 
-var person = []Person{}
+var person = [] Person{}
 
 func remove(s int) []Person {
     return append(person[:s], person[s+1:]...)
@@ -82,7 +82,6 @@ func deleteData(collection *mongo.Collection, r *gin.Engine) {
 		
 		for i, v := range person {
 			if v.ID == id && v.Contents == contents {
-				fmt.Println(v)
 				person = remove(i)
 				break
 			}
@@ -118,7 +117,6 @@ func updateData(collection *mongo.Collection, r *gin.Engine) {
 
 		for i, v := range person {
 			if v.ID == id {
-				fmt.Println(v)
 				person[i].Contents = contents
 				break
 			}
@@ -150,19 +148,18 @@ func selectData(collection *mongo.Collection, r *gin.Engine){
 		})
 	})
 }
+ 
+func CheckError(e error) {
+    if e != nil {
+        fmt.Println(e)
+    }
+}
 
 func main() {
 	r := gin.Default()
 
-	/*r.LoadHTMLGlob("template/*")
-
-	r.GET("/", func(c *gin.Context){
-		c.HTML(http.StatusOK, "main_page.html", gin.H{
-			"title": "Home_page",
-		})
-	})*/
     // Set client options
-    clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    clientOptions := options.Client().ApplyURI("mongodb://localhost:20000")
 	
 	clientOptions.SetAuth(options.Credential{
 		Username: "leechanhui",
@@ -183,7 +180,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-    collection := client.Database("testdb").Collection("people")
+    collection := client.Database("board").Collection("people")
 	
 	selectDataAll(collection, r)
 	insertData(collection, r)
@@ -192,11 +189,5 @@ func main() {
 	selectData(collection, r)
 
 	r.Run("localhost:3000")
-}
- 
-func CheckError(e error) {
-    if e != nil {
-        fmt.Println(e)
-    }
 }
 
