@@ -10,3 +10,4 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: leechanhui
       MONGO_INITDB_ROOT_PASSWORD: qwer1234
+
