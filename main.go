@@ -12,8 +12,8 @@ import (
 )
 
 type Person struct {
-	ID       string `form:"id" json:"id"`
-	Contents string `form:"contents" json:"contents"`
+	ID       string `json:"id"`
+	Contents string `json:"contents"`
 }
 
 var person = []Person{}
@@ -24,7 +24,6 @@ func remove(s int) []Person {
 
 func insertArray(collection *mongo.Collection, ctx context.Context) {
 	filter := bson.D{{}} //모든 데이터 조회
-
 	cur, _ := collection.Find(ctx, filter)
 
 	for cur.Next(ctx) {
@@ -37,17 +36,18 @@ func insertArray(collection *mongo.Collection, ctx context.Context) {
 		}
 
 		person = append(person, t)
+
 	}
 
 }
 
-func selectDataAll(collection *mongo.Collection, r *gin.Engine, ctx context.Context) {
+func selectDataAll(collection *mongo.Collection, r *gin.Engine, ctx context.Context) { //R
 	r.GET("/person", func(c *gin.Context) {
 		c.IndentedJSON(http.StatusOK, person)
 	})
 }
 
-func selectData(collection *mongo.Collection, r *gin.Engine, ctx context.Context) {
+func selectData(collection *mongo.Collection, r *gin.Engine, ctx context.Context) { //R
 	r.GET("/person/:id", func(c *gin.Context) {
 		id, isExist := c.Params.Get("id")
 
@@ -61,16 +61,17 @@ func selectData(collection *mongo.Collection, r *gin.Engine, ctx context.Context
 
 		filter := bson.D{{Key: "ID", Value: id}}
 		cur, _ := collection.Find(ctx, filter)
-
 		filterperson := []Person{}
 
 		for cur.Next(ctx) {
 			t := Person{}
 			err := cur.Decode(&t)
+
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
+
 			filterperson = append(filterperson, t)
 		}
 
@@ -84,7 +85,7 @@ func selectData(collection *mongo.Collection, r *gin.Engine, ctx context.Context
 	})
 }
 
-func insertData(collection *mongo.Collection, r *gin.Engine, ctx context.Context) {
+func insertData(collection *mongo.Collection, r *gin.Engine, ctx context.Context) { //C
 	r.POST("/person", func(c *gin.Context) {
 		var newPerson Person
 
@@ -114,7 +115,8 @@ func insertData(collection *mongo.Collection, r *gin.Engine, ctx context.Context
 	})
 }
 
-func deleteData(collection *mongo.Collection, r *gin.Engine, ctx context.Context) {
+func deleteData(collection *mongo.Collection, r *gin.Engine, ctx context.Context) { //D
+
 	r.DELETE("/person/:id", func(c *gin.Context) {
 		id, isExist := c.Params.Get("id")
 
@@ -157,7 +159,7 @@ func deleteData(collection *mongo.Collection, r *gin.Engine, ctx context.Context
 	})
 }
 
-func updateData(collection *mongo.Collection, r *gin.Engine, ctx context.Context) {
+func updateData(collection *mongo.Collection, r *gin.Engine, ctx context.Context) { //U
 	r.PATCH("/person/:id", func(c *gin.Context) {
 		id, isExist := c.Params.Get("id")
 
@@ -182,15 +184,12 @@ func updateData(collection *mongo.Collection, r *gin.Engine, ctx context.Context
 		for i, v := range person {
 			if id == v.ID {
 				person[i].Contents = newPerson.Contents
-
 				filter := bson.D{{Key: "ID", Value: id}}
-
 				update := bson.D{
 					{"$set", bson.D{
 						{Key: "Contents", Value: newPerson.Contents},
 					}},
 				}
-
 				_, e := collection.UpdateOne(ctx, filter, update)
 
 				if e != nil {
@@ -211,17 +210,13 @@ func updateData(collection *mongo.Collection, r *gin.Engine, ctx context.Context
 
 func main() {
 	r := gin.Default()
-
-	ctx, _ := context.WithCancel(context.Background())
-
+	ctx, _ := context.WithCancel(context.Background()) //context가 cancel 혹은 timeout으로 종료되면 context의 done이 호출
 	// Set client options
 	clientOptions := options.Client().ApplyURI(`mongodb://leechanhui:qwer1234@localhost:20000/?connect=direct`)
-
 	clientOptions.SetAuth(options.Credential{
 		Username: "leechanhui",
 		Password: "qwer1234",
 	})
-
 	// Connect to MongoDB
 	client, err := mongo.Connect(ctx, clientOptions)
 
