@@ -6,8 +6,23 @@ services:
     restart: always
     container_name: mongodb
     ports:
-      -  "20000:27017"
+      - "27017:27017"
+    networks:
+      - maccaptionNet
     environment:
       MONGO_INITDB_ROOT_USERNAME: leechanhui
       MONGO_INITDB_ROOT_PASSWORD: qwer1234
 
+  crudserver:
+    image: crudserver
+    container_name: crudserver
+    networks:
+      - maccaptionNet
+    ports:
+      - "80:8080"
+    depends_on:
+      - "mongodb"
+
+networks:
+  maccaptionNet:
+    driver: bridge

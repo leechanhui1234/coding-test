@@ -11,14 +11,13 @@ import (
 func GetDatabase() (collection *mongo.Collection, ctx context.Context) {
 	context, _ := context.WithCancel(context.Background()) //context가 cancel 혹은 timeout으로 종료되면 context의 done이 호출
 	// Set client options
-	clientOptions := options.Client().ApplyURI(`mongodb://leechanhui:qwer1234@localhost:20000/?connect=direct`)
+	clientOptions := options.Client().ApplyURI(`mongodb://mongodb:27017`)
 	clientOptions.SetAuth(options.Credential{
 		Username: "leechanhui",
 		Password: "qwer1234",
 	})
 	// Connect to MongoDB
 	client, err := mongo.Connect(ctx, clientOptions)
-
 	if err != nil {
 		log.Fatal(err)
 		return

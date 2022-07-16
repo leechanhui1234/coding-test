@@ -3,6 +3,7 @@ package handler
 import (
 	"coding-test/database"
 	"coding-test/model"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -84,7 +85,9 @@ func InsertData(c *gin.Context) { //C
 		return
 	}
 
-	_, e := collection.InsertOne(ctx, newPerson)
+	data, e := collection.InsertOne(ctx, newPerson)
+
+	fmt.Println(data)
 
 	if e != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": e.Error()})
@@ -113,12 +116,14 @@ func DeleteData(c *gin.Context) { //D
 		{Key: "ID", Value: id},
 	}
 
-	_, e := collection.DeleteOne(ctx, filter)
+	data, e := collection.DeleteOne(ctx, filter)
 
 	if e != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": e.Error()})
 		return
 	}
+
+	fmt.Println(data)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "OK",
@@ -147,6 +152,8 @@ func UpdateData(c *gin.Context) { //U
 
 		return
 	}
+
+	fmt.Println(newPerson)
 
 	filter := bson.D{{Key: "ID", Value: id}}
 	update := bson.D{

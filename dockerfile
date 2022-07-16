@@ -1,8 +1,10 @@
-FROM golang:alpine
+FROM golang:1.18-buster AS gobuilder
 
-RUN mkdir /app
+ENV CGO_ENABLED 0
+
+COPY . /app
 WORKDIR /app
-COPY go.mod go.sum crud-server.go /app/
-RUN go mod download
-RUN go build -o main .
-ENTRYPOINT ["./main"]
+
+RUN go build main.go
+CMD ["./main"]
+EXPOSE 8080
