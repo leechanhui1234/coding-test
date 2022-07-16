@@ -10,8 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+var collection, ctx = database.GetDatabase()
+
 func SelectDataAll(c *gin.Context) { //R
-	collection, ctx := database.GetDatabase()
 	filter := bson.D{{}} //모든 데이터 조회
 	cur, _ := collection.Find(ctx, filter)
 
@@ -38,7 +39,6 @@ func SelectDataAll(c *gin.Context) { //R
 }
 
 func SelectData(c *gin.Context) { //R
-	collection, ctx := database.GetDatabase()
 
 	id, isExist := c.Params.Get("id")
 
@@ -50,10 +50,12 @@ func SelectData(c *gin.Context) { //R
 		return
 	}
 
-	filter := bson.D{{Key: "ID", Value: id}}
+	filter := bson.D{{Key: "id", Value: id}}
 	cur, _ := collection.Find(ctx, filter)
 
 	filterperson := model.Person{}
+
+	fmt.Println(cur)
 
 	for cur.Next(ctx) {
 		err := cur.Decode(&filterperson)
@@ -73,7 +75,6 @@ func SelectData(c *gin.Context) { //R
 }
 
 func InsertData(c *gin.Context) { //C
-	collection, ctx := database.GetDatabase()
 
 	var newPerson model.Person
 
@@ -101,7 +102,6 @@ func InsertData(c *gin.Context) { //C
 }
 
 func DeleteData(c *gin.Context) { //D
-	collection, ctx := database.GetDatabase()
 	id, isExist := c.Params.Get("id")
 
 	if !isExist {
@@ -113,7 +113,7 @@ func DeleteData(c *gin.Context) { //D
 	}
 
 	filter := bson.D{
-		{Key: "ID", Value: id},
+		{Key: "id", Value: id},
 	}
 
 	data, e := collection.DeleteOne(ctx, filter)
@@ -132,7 +132,6 @@ func DeleteData(c *gin.Context) { //D
 }
 
 func UpdateData(c *gin.Context) { //U
-	collection, ctx := database.GetDatabase()
 	id, isExist := c.Params.Get("id")
 
 	if !isExist {
@@ -153,13 +152,11 @@ func UpdateData(c *gin.Context) { //U
 		return
 	}
 
-	fmt.Println(newPerson)
-
-	filter := bson.D{{Key: "ID", Value: id}}
+	filter := bson.D{{Key: "id", Value: id}}
 	update := bson.D{
 		{"$set", bson.D{
-			{Key: "ID", Value: id},
-			{Key: "Contents", Value: newPerson.Contents},
+			{Key: "id", Value: id},
+			{Key: "contents", Value: newPerson.Contents},
 		}},
 	}
 
@@ -170,7 +167,7 @@ func UpdateData(c *gin.Context) { //U
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"status":   "OK",
 		"updateid": id,
 	})
