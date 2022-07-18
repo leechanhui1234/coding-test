@@ -3,16 +3,14 @@ package handler
 import (
 	"coding-test/database"
 	"coding-test/model"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-var collection, ctx = database.GetDatabase()
-
 func SelectDataAll(c *gin.Context) { //R
+	var collection, ctx = database.GetDatabase()
 	filter := bson.D{{}} //모든 데이터 조회
 	cur, _ := collection.Find(ctx, filter)
 
@@ -39,7 +37,7 @@ func SelectDataAll(c *gin.Context) { //R
 }
 
 func SelectData(c *gin.Context) { //R
-
+	var collection, ctx = database.GetDatabase()
 	id, isExist := c.Params.Get("id")
 
 	if !isExist {
@@ -55,8 +53,6 @@ func SelectData(c *gin.Context) { //R
 
 	filterperson := model.Person{}
 
-	fmt.Println(cur)
-
 	for cur.Next(ctx) {
 		err := cur.Decode(&filterperson)
 
@@ -68,14 +64,20 @@ func SelectData(c *gin.Context) { //R
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status": "OK",
-		"data":   filterperson,
-	})
+	if filterperson.ID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "this is a empty data",
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "OK",
+			"data":   filterperson,
+		})
+	}
 }
 
 func InsertData(c *gin.Context) { //C
-
+	var collection, ctx = database.GetDatabase()
 	var newPerson model.Person
 
 	if err := c.BindJSON(&newPerson); err != nil {
@@ -86,9 +88,7 @@ func InsertData(c *gin.Context) { //C
 		return
 	}
 
-	data, e := collection.InsertOne(ctx, newPerson)
-
-	fmt.Println(data)
+	_, e := collection.InsertOne(ctx, newPerson)
 
 	if e != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": e.Error()})
@@ -102,6 +102,7 @@ func InsertData(c *gin.Context) { //C
 }
 
 func DeleteData(c *gin.Context) { //D
+	var collection, ctx = database.GetDatabase()
 	id, isExist := c.Params.Get("id")
 
 	if !isExist {
@@ -116,14 +117,12 @@ func DeleteData(c *gin.Context) { //D
 		{Key: "id", Value: id},
 	}
 
-	data, e := collection.DeleteOne(ctx, filter)
+	_, e := collection.DeleteOne(ctx, filter)
 
 	if e != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": e.Error()})
 		return
 	}
-
-	fmt.Println(data)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "OK",
@@ -132,6 +131,7 @@ func DeleteData(c *gin.Context) { //D
 }
 
 func UpdateData(c *gin.Context) { //U
+	var collection, ctx = database.GetDatabase()
 	id, isExist := c.Params.Get("id")
 
 	if !isExist {
@@ -156,6 +156,7 @@ func UpdateData(c *gin.Context) { //U
 	update := bson.D{
 		{"$set", bson.D{
 			{Key: "id", Value: id},
+			{Key: "title", Value: newPerson.Title},
 			{Key: "contents", Value: newPerson.Contents},
 		}},
 	}

@@ -31,7 +31,7 @@ func GetDatabase() (collection *mongo.Collection, ctx context.Context) {
 		return
 	}
 
-	collection = client.Database("board").Collection("people")
+	collection = client.Database("board").Collection("info")
 
 	return collection, context
 }
